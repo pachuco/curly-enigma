@@ -28,6 +28,7 @@
     #define SWP32(X) (((X)>>24)&0x000000FF) | (((X)>>8)&0x0000FF00) | (((X)<<8)&0x00FF0000) | (((X)<<24)&0xFF000000)
 #endif
 
+#define INIT_FILETHING(PATH) {{0}, 0, PATH}
 
 /*typedef struct {
     char* buf;
@@ -293,34 +294,34 @@ bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* ftFirm, int offset, int le
 
 //t1 firmwares have one pair of keys, t2 another
 static FileThing t1Firmwares[] = {
-    {{0}, 0, "./../t1/myV-55_KB3,MC  010604 1043(22)_251538352_M2004_F153_04_N2_Vodafone_FID12.fls"},
-    {{0}, 0, "./../t1/myC-5-2_KA3,RC 151004 1709(22)_251691245_F314_04_N1_Vodafone_FID12.fls"},
-    {{0}, 0, "./../t1/myC-5-2_KA3,RC 151004 1709(22)_251691245_F314_04_N1_Vodafone_FID21.fls"},
-    {{0}, 0, "./../t1/myC-5-2_KA3,RE 091104 1816(22)_251748432_F323_04_N1_Meteor_FID12.fls"},
-    {{0}, 0, "./../t1/myC-5-2_KA3,RE 091104 1816(22)_251748432_F323_04_N1_Meteor_FID21.fls"},
-    {{0}, 0, "./../t1/myC-5-2_KA3,RE  241104 1856(22)_251715582_F046_05_N1_FREE_FID21.fls"},
-    {{0}, 0, "./../t1/myC-5-2_KA3,RE  241104 1856(22)_251748432_F323_04_N1_FREE_FID12.fls"},
-    {{0}, 0, "./../t1/myX-4_KB3,NG 051004 1041(30)_251647776_FID12_FREE.fls"},
-    {{0}, 0, "./../t1/myX-4_KB3,NG 051004 1041(30)_251658394_FID21_FREE.fls"},
-    {{0}, 0, "./../t1/myX-4_KB3,NG 251004 1027(30)_251647776_FID12_FREE.fls"},
-    {{0}, 0, "./../t1/myX-4_KB3,NG 251004 1027(30)_251658394_FID21_FREE.fls"},
-    {{0}, 0, "./../t1/myX-4_KE3,ND 281004 1457(22)_251654437_FID12_ORANGE.fls"},
-    {{0}, 0, "./../t1/myX-4_KE3,ND 281004 1457(22)_251658394_FID21_ORANGE.fls"},
+    INIT_FILETHING("./../t1/myV-55_KB3,MC  010604 1043(22)_251538352_M2004_F153_04_N2_Vodafone_FID12.fls"),
+    INIT_FILETHING("./../t1/myC-5-2_KA3,RC 151004 1709(22)_251691245_F314_04_N1_Vodafone_FID12.fls"),
+    INIT_FILETHING("./../t1/myC-5-2_KA3,RC 151004 1709(22)_251691245_F314_04_N1_Vodafone_FID21.fls"),
+    INIT_FILETHING("./../t1/myC-5-2_KA3,RE 091104 1816(22)_251748432_F323_04_N1_Meteor_FID12.fls"),
+    INIT_FILETHING("./../t1/myC-5-2_KA3,RE 091104 1816(22)_251748432_F323_04_N1_Meteor_FID21.fls"),
+    INIT_FILETHING("./../t1/myC-5-2_KA3,RE  241104 1856(22)_251715582_F046_05_N1_FREE_FID21.fls"),
+    INIT_FILETHING("./../t1/myC-5-2_KA3,RE  241104 1856(22)_251748432_F323_04_N1_FREE_FID12.fls"),
+    INIT_FILETHING("./../t1/myX-4_KB3,NG 051004 1041(30)_251647776_FID12_FREE.fls"),
+    INIT_FILETHING("./../t1/myX-4_KB3,NG 051004 1041(30)_251658394_FID21_FREE.fls"),
+    INIT_FILETHING("./../t1/myX-4_KB3,NG 251004 1027(30)_251647776_FID12_FREE.fls"),
+    INIT_FILETHING("./../t1/myX-4_KB3,NG 251004 1027(30)_251658394_FID21_FREE.fls"),
+    INIT_FILETHING("./../t1/myX-4_KE3,ND 281004 1457(22)_251654437_FID12_ORANGE.fls"),
+    INIT_FILETHING("./../t1/myX-4_KE3,ND 281004 1457(22)_251658394_FID21_ORANGE.fls"),
 };
 
 static FileThing t2Firmwares[] = {
-    {{0}, 0, "./../t2/myX-5-2_KB3,ME 210604 1654(22)_251545034_M2004_F138_04_N1_IDEA_FID12.fls"},
-    {{0}, 0, "./../t2/myX-5-2_KB3,ME 210604 1654(22)_251545034_M2004_F138_04_N1_IDEA_FID21.fls"},
-    {{0}, 0, "./../t2/myX-5-2_KB3,MF  180604 1736(2F)_251587491_M2004_F168_04_N1_FREE_FID12.fls"},
-    {{0}, 0, "./../t2/myX-5-2_KB3,MF  180604 1736(2F)_251587491_M2004_F168_04_N1_FREE_FID21.fls"},
-    {{0}, 0, "./../t2/myX-5-2_KB3,MJ  300704 1919(22)_251608112_M2004_F240_04_N1_T-Mobile_FID12.fls"},
+    INIT_FILETHING("./../t2/myX-5-2_KB3,ME 210604 1654(22)_251545034_M2004_F138_04_N1_IDEA_FID12.fls"),
+    INIT_FILETHING("./../t2/myX-5-2_KB3,ME 210604 1654(22)_251545034_M2004_F138_04_N1_IDEA_FID21.fls"),
+    INIT_FILETHING("./../t2/myX-5-2_KB3,MF  180604 1736(2F)_251587491_M2004_F168_04_N1_FREE_FID12.fls"),
+    INIT_FILETHING("./../t2/myX-5-2_KB3,MF  180604 1736(2F)_251587491_M2004_F168_04_N1_FREE_FID21.fls"),
+    INIT_FILETHING("./../t2/myX-5-2_KB3,MJ  300704 1919(22)_251608112_M2004_F240_04_N1_T-Mobile_FID12.fls"),
 };
 
 //these files are known to exist in user FS part of firmwares
 //at best, I can hope to get a full user FS key
 static FileThing plaintexts[] = {
-    {{0}, 0, "./../plaintexts/barthezz.mid"},
-    {{0}, 0, "./../plaintexts/CultureBeat_-_MrVain__JD_20121217233537.mid"},
+    INIT_FILETHING("./../plaintexts/barthezz.mid"),
+    INIT_FILETHING("./../plaintexts/CultureBeat_-_MrVain__JD_20121217233537.mid"),
 };
 
 static CryptKey t1Keys[2] = {0};
