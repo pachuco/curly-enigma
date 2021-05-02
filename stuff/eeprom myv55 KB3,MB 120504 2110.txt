@@ -1,0 +1,312 @@
+Phone Information:
+302121104567 KB3,MB: 120504 2110
+
+Command 0x78 output:
+00 24 FF FF FF FF 22 00 00 00 00 00 00 00 22 00 00 00 00 00 00 00 22 00 00 00 00 00 00 00 22 00 00 00 00 00 00 00 
+
+Field 0 (9 bytes): 08 3A 35 14 04 00 09 75 90
+Field 1 (4 bytes): FF 98 07 21
+Field 2 (6 bytes): 00 00 00 00 00 00
+Field 3 (1 bytes): 3A
+Field 4 (1 bytes): 89
+Field 5 (1 bytes): 00
+Field 6 (1 bytes): 00
+Field 7 (19 bytes): FD FC 08 00 00 00 00 00 00 00 00 00 00 00 00 03 FE 00 66
+Field 8 (1 bytes): 00
+Field 9 (1 bytes): 00
+Field 10 (1 bytes): 00
+Field 11 (1 bytes): 00
+Field 12 (10 bytes): AA AA AA AA AA AA AA AA AA AA
+Field 13 (10 bytes): AA AA AA AA AA AA AA AA AA AA
+Field 14 (10 bytes): AA AA AA AA AA AA AA AA AA AA
+Field 15 (10 bytes): AA AA AA AA AA AA AA AA AA AA
+Field 16 (1 bytes): AA
+Field 17 (1 bytes): 00
+Field 18 (1 bytes): AA
+Field 19 (1 bytes): 45
+Field 20 (1 bytes): 00
+Field 21 (28 bytes): 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF FF FF 00 01
+Field 22 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 23 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 24 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 25 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 26 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 27 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 28 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 29 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 30 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 31 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 32 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 33 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 34 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 35 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 36 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 37 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 38 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 39 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 40 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 41 (28 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 42 (1 bytes): 00
+Field 43 (20 bytes): 62 31 66 64 00 00 00 00 00 00 00 00 00 00 10 00 50 B0 00 00
+Field 44 (20 bytes): 62 2A 2A 2E 2A 2A 2E 2A 2A 2A 2A 00 00 00 65 0E 00 B1 00 00
+Field 45 (20 bytes): 62 33 36 35 00 00 00 00 00 00 00 00 00 00 65 00 50 B0 00 00
+Field 46 (20 bytes): 62 49 74 69 6E 65 72 69 73 00 00 00 00 00 65 00 02 41 00 00
+Field 47 (20 bytes): 62 2A 2A 2E 2A 2A 2E 2A 2A 2A 2A 00 00 00 65 0E 00 B1 00 00
+Field 48 (20 bytes): 62 33 36 34 00 00 00 00 00 00 00 00 00 00 65 00 50 B0 00 00
+Field 49 (20 bytes): 62 46 20 53 46 52 00 00 00 00 00 00 00 00 65 00 02 41 00 00
+Field 50 (20 bytes): 62 2A 2A 2E 2A 2A 2E 2A 2A 2A 2A 00 00 11 01 0E 00 B1 00 00
+Field 51 (20 bytes): 62 33 36 33 00 00 00 00 00 00 00 00 00 11 01 00 50 B0 00 00
+Field 52 (20 bytes): 62 49 74 69 6E 65 72 69 73 00 00 00 00 11 01 00 02 41 00 00
+Field 53 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 54 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 55 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 56 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 57 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 58 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 59 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 60 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 61 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 62 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 63 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 64 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 65 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 66 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 67 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 68 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 69 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 70 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 71 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 72 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 73 (20 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 74 (1 bytes): 00
+Field 75 (1 bytes): 00
+Field 76 (1 bytes): 00
+Field 77 (1 bytes): 00
+Field 78 (1 bytes): 00
+Field 79 (1 bytes): 00
+Field 80 (1 bytes): 00
+Field 81 (1 bytes): 00
+Field 82 (1 bytes): 00
+Field 83 (1 bytes): 00
+Field 84 (1 bytes): 00
+Field 85 (1 bytes): 00
+Field 86 (1 bytes): 00
+Field 87 (1 bytes): 00
+Field 88 (1 bytes): 00
+Field 89 (1 bytes): 00
+Field 90 (1 bytes): 00
+Field 91 (1 bytes): 01
+Field 92 (1 bytes): 00
+Field 93 (1 bytes): 00
+Field 95 (1 bytes): 00
+Field 96 (12 bytes): 32 30 30 36 30 34 31 38 31 39 32 36
+Field 97 (1 bytes / 1 bits): 00
+Field 98 (1 bytes): 00
+Field 99 (9 bytes): 00 00 00 00 00 00 00 00 00
+Field 100 (4 bytes): 00 00 00 00
+Field 101 (1 bytes): 00
+Field 102 (4 bytes): 02 00 00 00
+Field 103 (1 bytes): 00
+Field 104 (1 bytes): 00
+Field 105 (2 bytes): 58 02
+Field 106 (1 bytes): 00
+Field 107 (1 bytes): 00
+Field 108 (1 bytes): 00
+Field 109 (1 bytes): 00
+Field 110 (1 bytes): 00
+Field 111 (1 bytes): 60
+Field 112 (1 bytes): 0A
+Field 113 (1 bytes): 00
+Field 114 (1 bytes): 00
+Field 115 (1 bytes): 00
+Field 116 (1 bytes): 00
+Field 117 (1 bytes): 00
+Field 118 (1 bytes): 00
+Field 119 (1 bytes): 00
+Field 120 (1 bytes): 00
+Field 121 (1 bytes): 00
+Field 122 (1 bytes): 00
+Field 123 (1 bytes): 00
+Field 124 (1 bytes): 5A
+Field 125 (1 bytes): 00
+Field 126 (1 bytes): 00
+Field 127 (1 bytes): 00
+Field 128 (1 bytes): 00
+Field 129 (1 bytes): 00
+Field 130 (1 bytes): 4A
+Field 131 (1 bytes): 4C
+Field 132 (1 bytes): 00
+Field 133 (1 bytes): 00
+Field 134 (1 bytes): 00
+Field 135 (1 bytes): 00
+Field 136 (1 bytes): 00
+Field 137 (1 bytes): 00
+Field 138 (1 bytes): 00
+Field 139 (1 bytes): 00
+Field 140 (9 bytes): 08 69 50 20 20 30 99 76 24
+Field 141 (1 bytes): 00
+Field 142 (1 bytes): 00
+Field 143 (1 bytes): 00
+Field 144 (16 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 145 (1 bytes): 00
+Field 146 (1 bytes): 00
+Field 147 (1 bytes): 9F
+Field 148 (1 bytes): 00
+Field 149 (1 bytes): F5
+Field 150 (1 bytes): 00
+Field 151 (1 bytes): 00
+Field 152 (1 bytes / 1 bits): 00
+Field 153 (1 bytes): 00
+Field 154 (1 bytes): 00
+Field 155 (1 bytes): 00
+Field 156 (1 bytes): 00
+Field 157 (1 bytes): 00
+Field 158 (1 bytes): 00
+Field 159 (1 bytes): 00
+Field 160 (1 bytes): 00
+Field 161 (1 bytes): 00
+Field 162 (1 bytes): 00
+Field 163 (1 bytes): 00
+Field 164 (2 bytes): 34 12
+Field 165 (2 bytes): 02 00
+Field 166 (1 bytes): 00
+Field 167 (1 bytes): 1E
+Field 168 (1 bytes): 00
+Field 169 (1 bytes): 00
+Field 170 (1 bytes): 00
+Field 171 (1 bytes): 33
+Field 172 (1 bytes): 00
+Field 173 (1 bytes): 00
+Field 174 (1 bytes): 00
+Field 175 (1 bytes): 00
+Field 176 (1 bytes / 2 bits): 80
+Field 177 (1 bytes): 00
+Field 178 (14 bytes): 12 26 02 00 20 F2 FF FF FF FF FF FF 10 01
+Field 179 (1 bytes): 00
+Field 180 (1 bytes): 00
+Field 181 (1 bytes): 00
+Field 182 (1 bytes): 00
+Field 183 (1 bytes): 00
+Field 184 (1 bytes): 00
+Field 185 (6 bytes): FF FF FF FF 01 FF
+Field 186 (1 bytes): 00
+Field 187 (1 bytes): 00
+Field 188 (12 bytes): AE 73 4B 2A 1B 12 9A 61 40 23 14 0C
+Field 189 (1 bytes): 00
+Field 190 (1 bytes): 00
+Field 193 (1 bytes): 00
+Field 194 (14 bytes): FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+Field 195 (1 bytes): FF
+Field 196 (1 bytes): 00
+Field 197 (1 bytes): 00
+Field 198 (1 bytes): 00
+Field 199 (10 bytes): 00 00 00 00 00 00 00 00 00 00
+Field 200 (1 bytes): 00
+Field 201 (6 bytes): 00 00 00 00 00 00
+Field 202 (1 bytes): 00
+Field 203 (1 bytes): 00
+Field 204 (1 bytes): 00
+Field 205 (1 bytes): 00
+Field 206 (20 bytes): 32 00 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+Field 207 (1 bytes): 00
+Field 208 (1 bytes): 00
+Field 209 (1 bytes): 00
+Field 210 (1 bytes): 00
+Field 211 (1 bytes): 00
+Field 212 (1 bytes): 00
+Field 213 (1 bytes): 00
+Field 214 (1 bytes): 00
+Field 215 (1 bytes): 00
+Field 216 (1 bytes): 00
+Field 217 (1 bytes): 00
+Field 218 (1 bytes): 00
+Field 219 (8 bytes): 11 2F 91 1F FF FF FF FF
+Field 220 (1 bytes): 00
+Field 221 (4 bytes): 4D 04 00 07
+Field 222 (12 bytes): 00 00 00 00 00 32 00 2B 00 00 00 00
+Field 223 (1 bytes): 00
+Field 224 (1 bytes): 00
+Field 225 (1 bytes): 00
+Field 226 (1 bytes): 00
+Field 227 (3 bytes): 03 C1 09
+Field 228 (1 bytes): 00
+Field 229 (1 bytes): 00
+Field 230 (1 bytes): 00
+Field 232 (1 bytes): 00
+Field 233 (1 bytes): 00
+Field 234 (1 bytes): 00
+Field 235 (1 bytes): 00
+Field 236 (1 bytes): 00
+Field 237 (1 bytes): 00
+Field 238 (1 bytes): 00
+Field 239 (3 bytes): A0 25 05
+Field 240 (6 bytes): 44 09 10 88 CF 6A
+Field 241 (16 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 242 (16 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 243 (16 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 244 (1 bytes): 00
+Field 245 (23 bytes): FF FF FF FF FF FF FF FF FF FF FF FF FF 01 FF FF FF FF FF FF FF FF FF
+Field 246 (1 bytes): 00
+Field 247 (1 bytes): 00
+Field 248 (1 bytes): 00
+Field 249 (1 bytes): 00
+Field 250 (1 bytes): 00
+Field 254 (1 bytes): 00
+Field 255 (1 bytes): 00
+Field 256 (1 bytes): 00
+Field 257 (1 bytes): 00
+Field 258 (4 bytes): 00 00 00 00
+Field 259 (10 bytes): 92 5D 3D 33 24 1F 17 14 10 7B
+Field 260 (10 bytes): 4F 34 29 1C 17 10 0D 0A 08 00
+Field 261 (1 bytes): 00
+Field 262 (1 bytes): 00
+Field 263 (1 bytes): 00
+Field 264 (1 bytes): 00
+Field 265 (1 bytes): 00
+Field 266 (30 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 267 (30 bytes): 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 268 (2 bytes): 83 00
+Field 269 (1 bytes): 00
+Field 270 (1 bytes): 00
+Field 271 (1 bytes): 00
+Field 995 (2 bytes): 84 40
+Field 996 (2 bytes): 01 00
+Field 997 (28 bytes): 51 57 29 11 00 21 25 14 85 44 40 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 998 (2 bytes): FF 02
+Field 999 (8 bytes): 00 00 00 23 01 98 69 78
+Field 4096 (3 bytes): AB CD EF
+Field 4100 (10 bytes): 13 48 21 04 04 13 48 21 04 04
+Field 4101 (9 bytes): 43 4F 47 12 23 02 19 05 04
+Field 4102 (1 bytes): FF
+Field 4109 (2 bytes): 04 04
+Field 4110 (5 bytes): 00 00 00 00 00
+Field 4111 (4 bytes): 0B 0B 0A 09
+Field 4112 (10 bytes): 00 00 00 00 00 00 00 00 FF 7F
+Field 4113 (10 bytes): 49 D9 5E FB B6 34 A2 0E 00 40
+Field 4114 (10 bytes): 00 00 00 00 00 00 00 00 FF 7F
+Field 4115 (10 bytes): 00 00 00 00 00 00 00 00 FF 7F
+Field 4175 (15 bytes): 31 34 38 35 34 32 63 7C 38 38 37 32 35 32 6C
+Field 5120 (1 bytes): 14
+Field 5185 (5 bytes): FF FF FF FF FF
+Field 16129 (2 bytes): 64 00
+Field 16134 (6 bytes): 44 00 49 00 4E 00
+Field 16135 (6 bytes): 41 00 4C 00 46 00
+Field 16136 (1 bytes): 00
+Field 16138 (2 bytes): 42 00
+Field 16140 (32 bytes): DF AC 02 DF 88 59 AE FC C0 EF 41 82 87 EF FF FF FF FF FF FF FF FF FF FF 38 70 D4 00 00 00 00 00
+Field 16141 (6 bytes): FF FF FF FF 01 FF
+Field 16142 (4 bytes): 0C 01 00 00
+Field 16143 (2 bytes): 04 00
+Field 16146 (1 bytes): 10
+Field 16148 (4 bytes): 00 00 00 00
+Field 16171 (6 bytes): 1B 00 01 00 1B 00
+Field 16173 (6 bytes): 12 00 01 00 12 00
+Field 16177 (16 bytes): 7F FF FF FF 7F 03 00 5F 7F 00 00 1F 42 85 98 03
+Field 16178 (1 bytes): 06
+Field 16181 (17 bytes): FF 28 00 00 00 05 31 01 00 A9 00 00 00 43 57 01 00
+Field 16182 (17 bytes): FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 16183 (17 bytes): FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 16184 (17 bytes): FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Field 16185 (2 bytes): 35 3F
+Field 16192 (1 bytes): 0E
+Field 16301 (37 bytes): 55 42 4F 53 5F 36 32 2B 5F 32 31 31 5F 36 30 30 33 30 31 30 34 5F 31 30 30 35 30 34 5F 32 30 33 33 5F 30 5F 32
