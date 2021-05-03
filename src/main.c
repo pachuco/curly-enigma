@@ -14,9 +14,9 @@
 
 #define COUNTOF(X) (sizeof(X) / sizeof(X[0]))
 
-#define GETBIT(BMAP, IND)   !!((BMAP)[(IND)>>3] &   (1<<((IND)&7)))
-#define SETBIT(BMAP, IND)     ((BMAP)[(IND)>>3] |=  (1<<((IND)&7)))
-#define UNSETBIT(BMAP, IND)   ((BMAP)[(IND)>>3] &= ~(1<<((IND)&7)))
+#define GETBIT(BMAP, IND)   !!((BMAP)[(IND)>>3] &   (0x80>>((IND)&0x7F)))
+#define SETBIT(BMAP, IND)     ((BMAP)[(IND)>>3] |=  (0x80>>((IND)&0x7F)))
+#define UNSETBIT(BMAP, IND)   ((BMAP)[(IND)>>3] &= ~(0x80>>((IND)&0x7F)))
 
 #ifdef BIG_ENDIAN
     #define SWP16(X) (X)
@@ -150,11 +150,12 @@ typedef struct { //len 48??
 } FirmwareHeader;
 #pragma pack(pop)
 
+#define MAX_HISTORY 8
 typedef struct {
-    uint8_t data[LEN_CRYPT];
-    //info on how key is obtained
-    uint8_t historySingleBytePlaintext[LEN_CRYPT>>3];
-    uint8_t historyFilePlaintext[LEN_CRYPT>>3];
+    uint8_t  data[LEN_CRYPT];
+    //shows which bytes were changed each round
+    uint32_t usedHistory;
+    uint8_t  history[MAX_HISTORY][LEN_CRYPT>>3];
 } CryptKey;
 
 typedef struct {
