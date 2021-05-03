@@ -5,11 +5,23 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #ifdef __WIN32
-#include "mman.h"
+    #include <io.h>
+    #include "mman.h"
+    #define open  _open
+    #define fstat _fstat
+    #define stat  _stat
+    #define close _close
+    #define O_ACCMODE _O_ACCMODE
+    #define O_RDONLY  _O_RDONLY
+    #define O_RDWR    _O_RDWR
+    #define O_WRONLY  _O_WRONLY
 #else
-#include <sys/mman.h>
+    #include <sys/mman.h>
 #endif
 
 #define COUNTOF(X) (sizeof(X) / sizeof(X[0]))
@@ -173,28 +185,40 @@ typedef struct {
 } FileThing;
 
 
-bool armFileThing(FileThing* ft, int wantedAccess) {
-    FILE* fin;
+bool armFileThing(FileThing* ft, uint32_t size, int accessFlags) {
+    struct stat sb;
     uint8_t* map;
-    uint32_t size;
+    int fd;
+    int wantedAccess;
+    
     if (ft->rawData) return true;
     
-    fin = fopen(ft->path, "rb");
-    if (!fin) return false;
-    
-    fseek(fin, 0, SEEK_END);
-    size = ftell(fin);
-    fseek(fin, 0, SEEK_SET);
-    
-    map = mmap(NULL, size, wantedAccess, MAP_SHARED, fileno(fin), 0);
-    if (map != MAP_FAILED) {
-        ft->size = size;
-        ft->rawData = map; //firm.header == rawData
-        ft->firm.data = map + LEN_HEADER;
+    switch (accessFlags & O_ACCMODE) {
+        case O_RDONLY:
+            wantedAccess = PROT_READ;
+            break;
+        case O_WRONLY:
+        case O_RDWR:
+            wantedAccess = PROT_WRITE | PROT_READ;
+    }
+    if ((fd = open(ft->path, accessFlags)) == -1) goto l_fail;
+    if (size == 0) {
+        if (fstat(fd, &sb) == -1) goto l_fail;
+        size = sb.st_size;
     }
     
-    fclose(fin);
+    map = mmap(NULL, size, wantedAccess, MAP_SHARED, fd, 0);
+    if (map == MAP_FAILED) goto l_fail;
+    ft->size = size;
+    ft->rawData = map; //firm.header == rawData
+    ft->firm.data = map + LEN_HEADER;
+    
+    close(fd);
     return true;
+    
+    l_fail:
+        if (fd != -1) close(fd);
+        return false;
 }
 
 void disarmFileThing(FileThing* ft) {
@@ -275,7 +299,7 @@ int XorUserFsAssumingSingleCharPlaintext(uint32_t decodeOff, uint8_t plainTextBy
 
 //offset excludes header!
 bool getKeyFromSingleCharPlaintext(CryptKey* ck, FileThing* ftFirm, int offset, uint8_t plainTextByte) {
-    if (!armFileThing(ftFirm, PROT_READ)) return false;
+    if (!armFileThing(ftFirm, 0, O_RDONLY)) return false;
     
     
     
@@ -283,8 +307,8 @@ bool getKeyFromSingleCharPlaintext(CryptKey* ck, FileThing* ftFirm, int offset, 
 }
 
 bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* ftFirm, int offset, int len, FileThing* ftPlain) {
-    if (!armFileThing(ftFirm, PROT_READ)) return false;
-    if (!armFileThing(ftPlain, PROT_READ)) return false;
+    if (!armFileThing(ftFirm,  0, O_RDONLY)) return false;
+    if (!armFileThing(ftPlain, 0, O_RDONLY)) return false;
     
     
     
