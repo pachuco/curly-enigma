@@ -185,11 +185,12 @@ typedef struct {
 } FileThing;
 
 
-bool mapFileThing(FileThing* ft, uint32_t size, int accessFlags) {
+bool openFileThing(FileThing* ft, int accessFlags) {
     struct stat sb;
     uint8_t* map;
     int fd;
     int wantedAccess;
+    uint32_t size = 0;
     
     if (ft->rawData) return true;
     
@@ -198,6 +199,9 @@ bool mapFileThing(FileThing* ft, uint32_t size, int accessFlags) {
             wantedAccess = PROT_READ;
             break;
         case O_WRONLY:
+            wantedAccess = PROT_WRITE;
+            size = ft->size;
+            break;
         case O_RDWR:
             wantedAccess = PROT_WRITE | PROT_READ;
             break;
@@ -222,7 +226,7 @@ bool mapFileThing(FileThing* ft, uint32_t size, int accessFlags) {
         return false;
 }
 
-void unmapFileThing(FileThing* ft) {
+void closeFileThing(FileThing* ft) {
     uint8_t* rawData = ft->rawData;
     uint32_t size = ft->size;
     
@@ -248,7 +252,7 @@ void unmapFileThing(FileThing* ft) {
     int grandWinNum = 1;
     
     printf("\n!Stage doBlankFind.\n");
-    for (int i=0; i < nrSegments; i++) {
+    for (uint32_t i=0; i < nrSegments; i++) {
         char* ptr1 = g_fileMem + startOffset + LEN_HEADER + LEN_CRYPT*i;
         int winNum = 1;
         
@@ -283,7 +287,7 @@ int XorUserFsAssumingSingleCharPlaintext(uint32_t decodeOff, uint8_t plainTextBy
     
     fwrite(g_fileMem, 1, fsOffset, fout);
     printf("\n!Stage XorUserFsAssumingSingleCharPlaintext.\n");
-    for (int i=fsOffset; i < g_fileMemLen; i++) {
+    for (uint32_t i=fsOffset; i < g_fileMemLen; i++) {
         char cipher = g_fileMem[i];
         char key    = g_fileMem[decodeOff + ((i - LEN_HEADER) & (LEN_CRYPT-1))] ^ plainTextByte;
         char plainText = cipher ^ key;
@@ -299,19 +303,19 @@ int XorUserFsAssumingSingleCharPlaintext(uint32_t decodeOff, uint8_t plainTextBy
 }*/
 
 //offset excludes header!
-bool getKeyFromBytePlaintext(CryptKey* ck, FileThing* ftFirm, int offset, uint8_t plainTextByte) {
-    if (!mapFileThing(ftFirm, 0, O_RDONLY)) return false;
+bool getKeyFromBytePlaintext(CryptKey* ck, FileThing* ftFirm, uint32_t offset, uint8_t plainTextByte) {
+    if (!openFileThing(ftFirm, O_RDONLY)) return false;
     
-    for (int i=0; i < LEN_CRYPT; i++) {
+    for (uint32_t i=0; i < LEN_CRYPT; i++) {
         uint8_t cipher = ftFirm->firm.data[offset+i];
         uint8_t key    = cipher ^ plainTextByte;
         
-        ck->data[(offset+i)&LEN_CRYPT] = key;
+        ck->data[(offset+i)&(LEN_CRYPT-1)] = key;
     }
     
     if (ck->usedHistory < MAX_HISTORY) {
-        for (int i=0; i < LEN_CRYPT; i++) {
-            SETBIT(ck->history[ck->usedHistory], (offset+i)&LEN_CRYPT);
+        for (uint32_t i=0; i < LEN_CRYPT; i++) {
+            SETBIT(ck->history[ck->usedHistory], (offset+i)&(LEN_CRYPT-1));
         }
         ck->usedHistory++;
     }
@@ -319,20 +323,20 @@ bool getKeyFromBytePlaintext(CryptKey* ck, FileThing* ftFirm, int offset, uint8_
     return true;
 }
 
-bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* ftFirm, int offset, FileThing* ftPlain) {
-    if (!mapFileThing(ftFirm,  0, O_RDONLY)) return false;
-    if (!mapFileThing(ftPlain, 0, O_RDONLY)) return false;
+bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* ftFirm, uint32_t offset, FileThing* ftPlain) {
+    if (!openFileThing(ftFirm,  O_RDONLY)) return false;
+    if (!openFileThing(ftPlain, O_RDONLY)) return false;
     
-    for (int i=0; i < ftPlain->size; i++) {
+    for (uint32_t i=0; i < ftPlain->size; i++) {
         uint8_t cipher = ftFirm->firm.data[offset+i];
         uint8_t key    = cipher ^ ftPlain->rawData[i];
         
-        ck->data[(offset+i)&LEN_CRYPT] = key;
+        ck->data[(offset+i)&(LEN_CRYPT-1)] = key;
     }
     
     if (ck->usedHistory < MAX_HISTORY) {
-        for (int i=0; i < ftPlain->size; i++) {
-            SETBIT(ck->history[ck->usedHistory], (offset+i)&LEN_CRYPT);
+        for (uint32_t i=0; i < ftPlain->size; i++) {
+            SETBIT(ck->history[ck->usedHistory], (offset+i)&(LEN_CRYPT-1));
         }
         ck->usedHistory++;
     }
@@ -382,7 +386,8 @@ int main(int argc, char* argv[]) {
     assert(LEN_HEADER == sizeof(FirmwareHeader));
     
     CHK(getKeyFromBytePlaintext(&t1Keys[1], &t1Firmwares[0], 0xDE0030, 0xFF));
-
+    
+    FileThing testFile = FT_DEFINE("./../dec_myV-55.bin");
     
     return 0;
 }
