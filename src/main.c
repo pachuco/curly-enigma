@@ -233,7 +233,10 @@ void closeFileThing(FileThing* ft) {
     memset(&ft->firm, 0, sizeof(Firmware));
     ft->size = 0;
     
-    if (rawData) munmap(rawData, size);
+    if (rawData) {
+        msync(rawData, size, MS_SYNC|MS_INVALIDATE);
+        munmap(rawData, size);
+    }
 }
 
 
@@ -344,6 +347,34 @@ bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* ftFirm, uint32_t offset, F
     return true;
 }
 
+bool xorFirmwareWithCryptkeyPair(CryptKey* ckOs, CryptKey* ckUser, FileThing* ftFirm, char* outPath) {
+    if (!openFileThing(ftFirm, O_RDONLY)) return false;
+    FileThing ftOut = FT_DEFINE(outPath);
+    ftOut.size = ftFirm->size;
+    if (!openFileThing(&ftOut, O_WRONLY)) return false;
+    
+    memcpy(ftOut.firm.header, ftFirm->firm.header, sizeof(FirmwareHeader));
+    
+    CryptKey* keys[2]   = {ckOs, ckUser}; 
+    uint32_t offsets[3] = {0, SWP24(ftFirm->firm.header->osSize01), ftFirm->size - LEN_HEADER};
+    for (uint32_t i=0; i < 2; i++) {
+        CryptKey* ck = keys[i];
+        uint32_t startOff = offsets[i+0];
+        uint32_t endOff   = offsets[i+1];
+        
+        if (!ck) {
+            memcpy(ftOut.firm.data+startOff, ftFirm->firm.data+startOff, endOff - startOff);
+            continue;
+        }
+        
+        for (uint32_t j=startOff; j < endOff; j++) {
+           ftOut.firm.data[j] = ftFirm->firm.data[j] ^ ck->data[j&(LEN_CRYPT-1)];
+        }
+    }
+    
+    closeFileThing(&ftOut);
+    return true;
+}
 
 //t1 firmwares have one pair of keys, t2 another
 static FileThing t1Firmwares[] = {
@@ -387,7 +418,7 @@ int main(int argc, char* argv[]) {
     
     CHK(getKeyFromBytePlaintext(&t1Keys[1], &t1Firmwares[0], 0xDE0030, 0xFF));
     
-    FileThing testFile = FT_DEFINE("./../dec_myV-55.bin");
+    xorFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[0], "./dec_myV-55.bin");
     
     return 0;
 }
