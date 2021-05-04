@@ -151,6 +151,7 @@ typedef struct {
 } FileThing;
 
 
+//----------------------------------------------------------------------
 bool openFileThing(FileThing* ft, int accessFlags) {
     #ifndef NONMMAP_FALLBACK
         struct stat sb;
@@ -296,30 +297,6 @@ void closeFileThing(FileThing* ft) {
         printf("No identical 64kb chunks or code failed.\n");
         return 0;
     }
-}
-
-int XorUserFsAssumingSingleCharPlaintext(uint32_t decodeOff, uint8_t plainTextByte) {
-    FILE* fout = fopen("decrypt.bin", "wb");
-    uint32_t fsOffset = SWP24(g_header->osSize01);
-    uint32_t mask = (LEN_CRYPT-1);
-    uint32_t offsetCorrection = decodeOff;
-    if(!fout) goto l_fail;
-    
-    fwrite(g_fileMem, 1, fsOffset, fout);
-    printf("\n!Stage XorUserFsAssumingSingleCharPlaintext.\n");
-    for (uint32_t i=fsOffset; i < g_fileMemLen; i++) {
-        char cipher = g_fileMem[i];
-        char key    = g_fileMem[decodeOff + ((i - LEN_HEADER) & (LEN_CRYPT-1))] ^ plainTextByte;
-        char plainText = cipher ^ key;
-        fwrite(&plainText, 1, 1, fout);
-    }
-    
-    fclose(fout);
-    
-    return 1;
-    l_fail:
-        if (fout) fclose(fout);
-        return 0;
 }*/
 
 //offset excludes header!
@@ -433,7 +410,9 @@ static CryptKey t2Keys[2] = {0};
 int main(int argc, char* argv[]) {
     assert(LEN_HEADER == sizeof(FirmwareHeader));
     
-    CHK(getKeyFromBytePlaintext(&t1Keys[1], &t1Firmwares[0], 0xDE0030, 0xFF));
+    CHK(getKeyFromBytePlaintext(&t1Keys[1], &t1Firmwares[0], 0xDE0030,            0xFF));
+    CHK(getKeyFromFilePlaintext(&t1Keys[1], &t1Firmwares[0], 0xE5109A-LEN_HEADER, &plaintexts[0])); //barthezz
+    CHK(getKeyFromFilePlaintext(&t1Keys[1], &t1Firmwares[0], 0xF0D38A-LEN_HEADER, &plaintexts[1])); //mrvain
     
     CHK(xorFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[0], "./dec_myV-55.bin"));
     
