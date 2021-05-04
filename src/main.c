@@ -130,6 +130,7 @@ void freeMemFile(MemFile* mf) {
 
 #define LEN_HEADER 0x30
 #define LEN_CRYPT 0x10000
+#define MAX_HISTORY 8
 
 #pragma pack(push,1)
 typedef struct { //len 48??
@@ -162,7 +163,6 @@ typedef struct { //len 48??
 } FirmwareHeader;
 #pragma pack(pop)
 
-#define MAX_HISTORY 8
 typedef struct {
     uint8_t  data[LEN_CRYPT];
     //shows which bytes were changed each round
@@ -299,19 +299,43 @@ int XorUserFsAssumingSingleCharPlaintext(uint32_t decodeOff, uint8_t plainTextBy
 }*/
 
 //offset excludes header!
-bool getKeyFromSingleCharPlaintext(CryptKey* ck, FileThing* ftFirm, int offset, uint8_t plainTextByte) {
+bool getKeyFromBytePlaintext(CryptKey* ck, FileThing* ftFirm, int offset, uint8_t plainTextByte) {
     if (!mapFileThing(ftFirm, 0, O_RDONLY)) return false;
     
+    for (int i=0; i < LEN_CRYPT; i++) {
+        uint8_t cipher = ftFirm->firm.data[offset+i];
+        uint8_t key    = cipher ^ plainTextByte;
+        
+        ck->data[(offset+i)&LEN_CRYPT] = key;
+    }
     
+    if (ck->usedHistory < MAX_HISTORY) {
+        for (int i=0; i < LEN_CRYPT; i++) {
+            SETBIT(ck->history[ck->usedHistory], (offset+i)&LEN_CRYPT);
+        }
+        ck->usedHistory++;
+    }
     
     return true;
 }
 
-bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* ftFirm, int offset, int len, FileThing* ftPlain) {
+bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* ftFirm, int offset, FileThing* ftPlain) {
     if (!mapFileThing(ftFirm,  0, O_RDONLY)) return false;
     if (!mapFileThing(ftPlain, 0, O_RDONLY)) return false;
     
+    for (int i=0; i < ftPlain->size; i++) {
+        uint8_t cipher = ftFirm->firm.data[offset+i];
+        uint8_t key    = cipher ^ ftPlain->rawData[i];
+        
+        ck->data[(offset+i)&LEN_CRYPT] = key;
+    }
     
+    if (ck->usedHistory < MAX_HISTORY) {
+        for (int i=0; i < ftPlain->size; i++) {
+            SETBIT(ck->history[ck->usedHistory], (offset+i)&LEN_CRYPT);
+        }
+        ck->usedHistory++;
+    }
     
     return true;
 }
@@ -349,6 +373,7 @@ static FileThing plaintexts[] = {
     FT_DEFINE("./../plaintexts/CultureBeat_-_MrVain__JD_20121217233537.mid"),
 };
 
+//OS image, followed by user FS
 static CryptKey t1Keys[2] = {0};
 static CryptKey t2Keys[2] = {0};
 
@@ -356,15 +381,7 @@ static CryptKey t2Keys[2] = {0};
 int main(int argc, char* argv[]) {
     assert(LEN_HEADER == sizeof(FirmwareHeader));
     
-    
-    //CHK(g_fileMem = loadfile("", &g_fileMemLen));
-    
-    uint32_t blankOffset = 0xDE0030;
-    //printHeader();
-    //CHK(doBlankFind(&blankOffset, SWP24(g_header->osSize01)));
-    
-    //CHK(doDumbXOR(blankOffset, NULL));
-    //CHK(XorUserFsAssumingSingleCharPlaintext(blankOffset, 0xFF));
+    CHK(getKeyFromBytePlaintext(&t1Keys[1], &t1Firmwares[0], 0xDE0030, 0xFF));
 
     
     return 0;
