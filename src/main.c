@@ -20,6 +20,8 @@
     #define O_RDONLY  _O_RDONLY
     #define O_RDWR    _O_RDWR
     #define O_WRONLY  _O_WRONLY
+    #define O_CREAT   _O_CREAT
+    #define ftruncate _chsize
 #else
     #include <sys/mman.h>
 #endif
@@ -41,43 +43,6 @@
 #endif
 
 #define FT_DEFINE(PATH) {{0}, 0, PATH}
-
-/*typedef struct {
-    char* buf;
-    int   len;
-} MemFile;
-
-int loadMemFile(char* path, MemFile* mf) {
-    char* buf; int len;
-	FILE* fin = fopen(path, "rb");
-	if (!fin) return 0;
-
-    fseek(fin, 0, SEEK_END);
-    len = ftell( fin );
-    fseek(fin, 0, SEEK_SET);
-
-    buf = malloc(len);
-    if(!buf) {
-        fclose(fin);
-        return 0;
-    }
-
-    fread(buf, 1, len, fin);
-	fclose(fin);
-    
-    mf->buf = buf;
-    mf->len = len;
-    
-    return 1;
-}
-
-void freeMemFile(MemFile* mf) {
-    if (mf) {
-        if (mf->buf) free(mf->buf);
-        mf->buf = 0;
-        mf->len = 0;
-    }
-}*/
 
 
 
@@ -131,6 +96,7 @@ void freeMemFile(MemFile* mf) {
 #define LEN_HEADER 0x30
 #define LEN_CRYPT 0x10000
 #define MAX_HISTORY 8
+#define NONMMAP_FALLBACK
 
 #pragma pack(push,1)
 typedef struct { //len 48??
@@ -186,57 +152,108 @@ typedef struct {
 
 
 bool openFileThing(FileThing* ft, int accessFlags) {
-    struct stat sb;
-    uint8_t* map;
-    int fd;
-    int wantedAccess;
-    uint32_t size = 0;
-    
-    if (ft->rawData) return true;
-    
-    switch (accessFlags & O_ACCMODE) {
-        case O_RDONLY:
-            wantedAccess = PROT_READ;
-            break;
-        case O_WRONLY:
-            wantedAccess = PROT_WRITE;
-            size = ft->size;
-            break;
-        case O_RDWR:
-            wantedAccess = PROT_WRITE | PROT_READ;
-            break;
-    }
-    if ((fd = open(ft->path, accessFlags)) == -1) goto l_fail;
-    if (size == 0) {
-        if (fstat(fd, &sb) == -1) goto l_fail;
-        size = sb.st_size;
-    }
-    
-    map = mmap(NULL, size, wantedAccess, MAP_SHARED, fd, 0);
-    if (map == MAP_FAILED) goto l_fail;
-    ft->size = size;
-    ft->rawData = map; //firm.header == rawData
-    ft->firm.data = map + LEN_HEADER;
-    
-    close(fd);
-    return true;
-    
-    l_fail:
-        if (fd != -1) close(fd);
-        return false;
+    #ifndef NONMMAP_FALLBACK
+        struct stat sb;
+        uint8_t* map;
+        int fd;
+        int wantedAccess = 0;
+        uint32_t size = 0;
+        
+        if (ft->rawData) return true;
+        
+        switch (accessFlags & O_ACCMODE) {
+            case O_RDONLY:
+                wantedAccess = PROT_READ;
+                break;
+            case O_WRONLY:
+                wantedAccess = PROT_WRITE;
+                size = ft->size;
+                break;
+            case O_RDWR:
+                wantedAccess = PROT_WRITE | PROT_READ;
+                break;
+        }
+        if ((fd = open(ft->path, accessFlags)) == -1) goto l_fail;
+        if (size == 0) {
+            if (fstat(fd, &sb) == -1) goto l_fail;
+            size = sb.st_size;
+        } else {
+            if (ftruncate(fd, size) == -1) goto l_fail;
+        }
+        
+        map = mmap(NULL, size, wantedAccess, MAP_SHARED, fd, 0);
+        if (map == MAP_FAILED) goto l_fail;
+        
+        ft->size = size;
+        ft->rawData = map; //firm.header == rawData
+        ft->firm.data = map + LEN_HEADER;
+        
+        close(fd);
+        return true;
+        
+        l_fail:
+            if (fd != -1) close(fd);
+            return false;
+    #else
+        char* buf  = NULL;
+        FILE* file = NULL;
+        
+        if ((accessFlags & O_ACCMODE) == O_WRONLY) {
+            buf = calloc(ft->size, 1);
+            if (!buf) return false;
+            
+            ft->rawData = buf; //firm.header == rawData
+            ft->firm.data = buf + LEN_HEADER;
+        } else {
+            FILE* file = fopen(ft->path, "rb");
+            uint32_t size;
+            if (!file) return false;
+            
+            fseek(file, 0, SEEK_END);
+            size = ftell(file);
+            fseek(file, 0, SEEK_SET);
+            
+            buf = calloc(size, 1);
+            if (!buf) {
+                fclose(file);
+                return false;
+            }
+            
+            fread(buf, 1, size, file);
+            fclose(file);
+            
+            ft->size = size;
+            ft->rawData = buf; //firm.header == rawData
+            ft->firm.data = buf + LEN_HEADER;
+        }
+        
+        if (file) fclose(file);
+        return true;
+    #endif
 }
 
 void closeFileThing(FileThing* ft) {
-    uint8_t* rawData = ft->rawData;
-    uint32_t size = ft->size;
-    
-    memset(&ft->firm, 0, sizeof(Firmware));
-    ft->size = 0;
-    
-    if (rawData) {
-        msync(rawData, size, MS_SYNC|MS_INVALIDATE);
-        munmap(rawData, size);
-    }
+    #ifndef NONMMAP_FALLBACK
+        uint8_t* rawData = ft->rawData;
+        uint32_t size = ft->size;
+        
+        memset(&ft->firm, 0, sizeof(Firmware));
+        ft->size = 0;
+        
+        if (rawData) {
+            msync(rawData, size, MS_SYNC|MS_INVALIDATE);
+            munmap(rawData, size);
+        }
+    #else
+        FILE* file = fopen(ft->path, "wb");
+        if (file) {
+            fwrite(ft->rawData, 1, ft->size, file);
+            fclose(file);
+        }
+        if (ft->rawData) {
+            free(ft->rawData);
+        }
+    #endif
 }
 
 
@@ -306,11 +323,11 @@ int XorUserFsAssumingSingleCharPlaintext(uint32_t decodeOff, uint8_t plainTextBy
 }*/
 
 //offset excludes header!
-bool getKeyFromBytePlaintext(CryptKey* ck, FileThing* ftFirm, uint32_t offset, uint8_t plainTextByte) {
-    if (!openFileThing(ftFirm, O_RDONLY)) return false;
+bool getKeyFromBytePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, uint8_t plainTextByte) {
+    if (!openFileThing(pFtFirm, O_RDONLY)) return false;
     
     for (uint32_t i=0; i < LEN_CRYPT; i++) {
-        uint8_t cipher = ftFirm->firm.data[offset+i];
+        uint8_t cipher = pFtFirm->firm.data[offset+i];
         uint8_t key    = cipher ^ plainTextByte;
         
         ck->data[(offset+i)&(LEN_CRYPT-1)] = key;
@@ -326,19 +343,19 @@ bool getKeyFromBytePlaintext(CryptKey* ck, FileThing* ftFirm, uint32_t offset, u
     return true;
 }
 
-bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* ftFirm, uint32_t offset, FileThing* ftPlain) {
-    if (!openFileThing(ftFirm,  O_RDONLY)) return false;
-    if (!openFileThing(ftPlain, O_RDONLY)) return false;
+bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, FileThing* pFtPlain) {
+    if (!openFileThing(pFtFirm,  O_RDONLY)) return false;
+    if (!openFileThing(pFtPlain, O_RDONLY)) return false;
     
-    for (uint32_t i=0; i < ftPlain->size; i++) {
-        uint8_t cipher = ftFirm->firm.data[offset+i];
-        uint8_t key    = cipher ^ ftPlain->rawData[i];
+    for (uint32_t i=0; i < pFtPlain->size; i++) {
+        uint8_t cipher = pFtFirm->firm.data[offset+i];
+        uint8_t key    = cipher ^ pFtPlain->rawData[i];
         
         ck->data[(offset+i)&(LEN_CRYPT-1)] = key;
     }
     
     if (ck->usedHistory < MAX_HISTORY) {
-        for (uint32_t i=0; i < ftPlain->size; i++) {
+        for (uint32_t i=0; i < pFtPlain->size; i++) {
             SETBIT(ck->history[ck->usedHistory], (offset+i)&(LEN_CRYPT-1));
         }
         ck->usedHistory++;
@@ -347,28 +364,28 @@ bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* ftFirm, uint32_t offset, F
     return true;
 }
 
-bool xorFirmwareWithCryptkeyPair(CryptKey* ckOs, CryptKey* ckUser, FileThing* ftFirm, char* outPath) {
-    if (!openFileThing(ftFirm, O_RDONLY)) return false;
+bool xorFirmwareWithCryptkeyPair(CryptKey* ckOs, CryptKey* ckUser, FileThing* pFtFirm, char* outPath) {
+    if (!openFileThing(pFtFirm, O_RDONLY)) return false;
     FileThing ftOut = FT_DEFINE(outPath);
-    ftOut.size = ftFirm->size;
-    if (!openFileThing(&ftOut, O_WRONLY)) return false;
+    ftOut.size = pFtFirm->size;
+    if (!openFileThing(&ftOut, O_WRONLY|O_CREAT)) return false;
     
-    memcpy(ftOut.firm.header, ftFirm->firm.header, sizeof(FirmwareHeader));
+    memcpy(ftOut.firm.header, pFtFirm->firm.header, sizeof(FirmwareHeader));
     
     CryptKey* keys[2]   = {ckOs, ckUser}; 
-    uint32_t offsets[3] = {0, SWP24(ftFirm->firm.header->osSize01), ftFirm->size - LEN_HEADER};
+    uint32_t offsets[3] = {0, SWP24(pFtFirm->firm.header->osSize01), pFtFirm->size - LEN_HEADER};
     for (uint32_t i=0; i < 2; i++) {
         CryptKey* ck = keys[i];
         uint32_t startOff = offsets[i+0];
         uint32_t endOff   = offsets[i+1];
         
         if (!ck) {
-            memcpy(ftOut.firm.data+startOff, ftFirm->firm.data+startOff, endOff - startOff);
+            memcpy(ftOut.firm.data+startOff, pFtFirm->firm.data+startOff, endOff - startOff);
             continue;
         }
         
         for (uint32_t j=startOff; j < endOff; j++) {
-           ftOut.firm.data[j] = ftFirm->firm.data[j] ^ ck->data[j&(LEN_CRYPT-1)];
+           ftOut.firm.data[j] = pFtFirm->firm.data[j] ^ ck->data[j&(LEN_CRYPT-1)];
         }
     }
     
@@ -418,7 +435,7 @@ int main(int argc, char* argv[]) {
     
     CHK(getKeyFromBytePlaintext(&t1Keys[1], &t1Firmwares[0], 0xDE0030, 0xFF));
     
-    xorFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[0], "./dec_myV-55.bin");
+    CHK(xorFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[0], "./dec_myV-55.bin"));
     
     return 0;
 }
