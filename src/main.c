@@ -313,8 +313,8 @@ bool getKeyFromBytePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, 
         for (uint32_t i=0; i < LEN_CRYPT; i++) {
             SETBIT(ck->history[ck->usedHistory], (offset+i)&(LEN_CRYPT-1));
         }
-        ck->usedHistory++;
     }
+    ck->usedHistory++;
     
     return true;
 }
@@ -326,16 +326,14 @@ bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, 
     for (uint32_t i=0; i < pFtPlain->size; i++) {
         uint8_t cipher = pFtFirm->firm.data[offset+i];
         uint8_t key    = cipher ^ pFtPlain->rawData[i];
+        uint8_t oldKey = ck->data[(offset+i)&(LEN_CRYPT-1)];
         
         ck->data[(offset+i)&(LEN_CRYPT-1)] = key;
-    }
-    
-    if (ck->usedHistory < MAX_HISTORY) {
-        for (uint32_t i=0; i < pFtPlain->size; i++) {
+        if (ck->usedHistory < MAX_HISTORY && key != oldKey) {
             SETBIT(ck->history[ck->usedHistory], (offset+i)&(LEN_CRYPT-1));
         }
-        ck->usedHistory++;
     }
+    ck->usedHistory++;
     
     return true;
 }
