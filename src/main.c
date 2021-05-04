@@ -96,7 +96,6 @@
 #define LEN_HEADER 0x30
 #define LEN_CRYPT 0x10000
 #define MAX_HISTORY 8
-#define NONMMAP_FALLBACK
 
 #pragma pack(push,1)
 typedef struct { //len 48??
@@ -341,7 +340,7 @@ bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, 
     return true;
 }
 
-bool xorFirmwareWithCryptkeyPair(CryptKey* ckOs, CryptKey* ckUser, FileThing* pFtFirm, char* outPath) {
+bool writeXoredFirmwareWithCryptkeyPair(CryptKey* ckOs, CryptKey* ckUser, FileThing* pFtFirm, char* outPath) {
     if (!openFileThing(pFtFirm, O_RDONLY)) return false;
     FileThing ftOut = FT_DEFINE(outPath);
     ftOut.size = pFtFirm->size;
@@ -411,10 +410,10 @@ int main(int argc, char* argv[]) {
     assert(LEN_HEADER == sizeof(FirmwareHeader));
     
     CHK(getKeyFromBytePlaintext(&t1Keys[1], &t1Firmwares[0], 0xDE0030,            0xFF));
-    CHK(getKeyFromFilePlaintext(&t1Keys[1], &t1Firmwares[0], 0xE5109A-LEN_HEADER, &plaintexts[0])); //barthezz
-    CHK(getKeyFromFilePlaintext(&t1Keys[1], &t1Firmwares[0], 0xF0D38A-LEN_HEADER, &plaintexts[1])); //mrvain
+    CHK(getKeyFromFilePlaintext(&t1Keys[1], &t1Firmwares[0], 0xE5109A-LEN_HEADER, &plaintexts[0])); //myv55: barthezz
+    CHK(getKeyFromFilePlaintext(&t1Keys[1], &t1Firmwares[0], 0xF0D38A-LEN_HEADER, &plaintexts[1])); //myv55: mrvain
     
-    CHK(xorFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[0], "./dec_myV-55.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[0], "./dec_myV-55.bin"));
     
     return 0;
 }
