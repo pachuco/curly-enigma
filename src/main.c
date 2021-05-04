@@ -185,7 +185,7 @@ typedef struct {
 } FileThing;
 
 
-bool armFileThing(FileThing* ft, uint32_t size, int accessFlags) {
+bool mapFileThing(FileThing* ft, uint32_t size, int accessFlags) {
     struct stat sb;
     uint8_t* map;
     int fd;
@@ -200,6 +200,7 @@ bool armFileThing(FileThing* ft, uint32_t size, int accessFlags) {
         case O_WRONLY:
         case O_RDWR:
             wantedAccess = PROT_WRITE | PROT_READ;
+            break;
     }
     if ((fd = open(ft->path, accessFlags)) == -1) goto l_fail;
     if (size == 0) {
@@ -221,7 +222,7 @@ bool armFileThing(FileThing* ft, uint32_t size, int accessFlags) {
         return false;
 }
 
-void disarmFileThing(FileThing* ft) {
+void unmapFileThing(FileThing* ft) {
     uint8_t* rawData = ft->rawData;
     uint32_t size = ft->size;
     
@@ -299,7 +300,7 @@ int XorUserFsAssumingSingleCharPlaintext(uint32_t decodeOff, uint8_t plainTextBy
 
 //offset excludes header!
 bool getKeyFromSingleCharPlaintext(CryptKey* ck, FileThing* ftFirm, int offset, uint8_t plainTextByte) {
-    if (!armFileThing(ftFirm, 0, O_RDONLY)) return false;
+    if (!mapFileThing(ftFirm, 0, O_RDONLY)) return false;
     
     
     
@@ -307,8 +308,8 @@ bool getKeyFromSingleCharPlaintext(CryptKey* ck, FileThing* ftFirm, int offset, 
 }
 
 bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* ftFirm, int offset, int len, FileThing* ftPlain) {
-    if (!armFileThing(ftFirm,  0, O_RDONLY)) return false;
-    if (!armFileThing(ftPlain, 0, O_RDONLY)) return false;
+    if (!mapFileThing(ftFirm,  0, O_RDONLY)) return false;
+    if (!mapFileThing(ftPlain, 0, O_RDONLY)) return false;
     
     
     
