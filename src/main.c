@@ -32,15 +32,9 @@
 #define SETBIT(BMAP, IND)     ((BMAP)[(IND)>>3] |=  (0x80>>((IND)&0x7F)))
 #define UNSETBIT(BMAP, IND)   ((BMAP)[(IND)>>3] &= ~(0x80>>((IND)&0x7F)))
 
-#ifdef BIG_ENDIAN
-    #define SWP16(X) (X)
-    #define SWP24(X) (X)
-    #define SWP32(X) (X)
-#else
-    #define SWP16(X) (((X)>>8)&0x00FF) | (((X)<<8)&0xFF00)
-    #define SWP24(X) (((X)>>16)&0x0000FF) | ((X)&0x00FF00) | (((X)<<16)&0xFF0000) 
-    #define SWP32(X) (((X)>>24)&0x000000FF) | (((X)>>8)&0x0000FF00) | (((X)<<8)&0x00FF0000) | (((X)<<24)&0xFF000000)
-#endif
+#define SWP16(X) (((X)>>8)&0x00FF) | (((X)<<8)&0xFF00)
+#define SWP24(X) (((X)>>16)&0x0000FF) | ((X)&0x00FF00) | (((X)<<16)&0xFF0000) 
+#define SWP32(X) (((X)>>24)&0x000000FF) | (((X)>>8)&0x0000FF00) | (((X)<<8)&0x00FF0000) | (((X)<<24)&0xFF000000)
 
 #define FT_DEFINE(PATH) {{0}, 0, PATH}
 
@@ -367,6 +361,128 @@ bool writeXoredFirmwareWithCryptkeyPair(CryptKey* ckOs, CryptKey* ckUser, FileTh
     return true;
 }
 
+
+
+#define MAIN_WIDTH      256
+#define MAIN_HEIGHT     LEN_CRYPT/MAIN_WIDTH
+#define RULER_WIDTH     4*2
+#define COL_RULKEYBG    0x40
+#define COL_RULHISTBG   0x00
+#define COL_RULORHISTBG 0x63
+#define COL_RULFG       0xFF
+#define COL_BITMFG      0xFF
+#define COL_BITMBG      0x00
+#pragma pack(push,1)
+typedef struct {
+    uint16_t  bfType;
+    uint32_t  bfSize;
+    uint16_t  bfReserved1;
+    uint16_t  bfReserved2;
+    uint32_t  bfOffBits;
+    
+    uint32_t  biSize;
+    uint32_t  biWidth;
+    uint32_t  biHeight;
+    uint16_t  biPlanes;
+    uint16_t  biBitCount;
+    uint32_t  biCompression;
+    uint32_t  JUNK[5];
+    uint32_t  palette[256];  
+} BmpHeader;
+#pragma pack(pop)
+bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
+    uint8_t orMap[LEN_CRYPT>>3] = {0};
+    uint8_t* out;
+    uint32_t imageCount = (1 + ck->usedHistory + 1);
+    uint32_t pixelCount = ((MAIN_WIDTH+RULER_WIDTH)*MAIN_HEIGHT) * imageCount;
+    FileThing ftOut = FT_DEFINE(outPath);
+    ftOut.size = sizeof(BmpHeader) + (pixelCount);
+    if (!openFileThing(&ftOut, O_WRONLY|O_CREAT)) return false;
+    BmpHeader* bmpHeader = ftOut.rawData;
+    
+    memset(bmpHeader, 0x00, sizeof(BmpHeader));
+    bmpHeader->bfType        = 0x4D42; //BM
+    bmpHeader->bfOffBits     = sizeof(bmpHeader);
+    bmpHeader->bfSize        = sizeof(bmpHeader) + pixelCount;
+    bmpHeader->biSize        = 40; //offsetof(BmpFile,Pal)-offsetof(BmpFile,biSize)
+    bmpHeader->biWidth       = MAIN_WIDTH+RULER_WIDTH;
+    bmpHeader->biHeight      = MAIN_HEIGHT * imageCount;
+    bmpHeader->biPlanes      = 1;
+    bmpHeader->biBitCount    = 8;
+    bmpHeader->biCompression = 0; //BI_RGB
+    
+    //rgb(3:3:2) palette
+    uint32_t i = 0;
+    for (uint32_t red=0; red < 8; red++) {
+        for (uint32_t green=0; green < 8; green++) {
+            for (uint32_t blue=0; blue < 8; blue++) {
+                bmpHeader->palette[i++] = ((blue*255)/3) | (((green*255)/7) << 8) | (((red*255)/7) << 16);
+            }
+        }
+    }
+    
+    void drawRuler(uint8_t** ppOut, uint8_t colBg) {
+        for (int i=0; i < MAIN_HEIGHT; i++) {
+            #define NUM_DIVISIONS 1
+            uint32_t wMask = 0xFF>>(NUM_DIVISIONS-1);
+            uint8_t  rulerLineWidth;
+            *ppOut += MAIN_WIDTH;
+            
+            //background
+            memset(*ppOut, colBg, RULER_WIDTH);
+            
+            //foreground
+            for (rulerLineWidth=(NUM_DIVISIONS-1); rulerLineWidth>0; rulerLineWidth--) {
+                if (!(wMask<<rulerLineWidth)) break;
+            }
+            memset(*ppOut, COL_RULFG, rulerLineWidth);
+            
+            *ppOut += RULER_WIDTH;
+        }
+    }
+    
+    //ruler
+    out = ftOut.rawData + sizeof(BmpHeader);
+    drawRuler(&out, COL_RULKEYBG);
+    for (int i=0; i<ck->usedHistory; i++) drawRuler(&out, COL_RULHISTBG);
+    drawRuler(&out, COL_RULORHISTBG);
+    
+    out = ftOut.rawData + sizeof(BmpHeader);
+    //key
+    for (int i=0; i < MAIN_HEIGHT; i++) {
+        memcpy(out, &ck->data[i* MAIN_WIDTH], MAIN_WIDTH);
+        out += MAIN_WIDTH+RULER_WIDTH;
+    }
+    
+    //history
+    for (int i=0; i < ck->usedHistory; i++) {
+        for (int j=0; j < MAIN_HEIGHT; j++) {
+            for (int k=0; k < MAIN_WIDTH; k++) {
+                out[k] = GETBIT(ck->history[i], (j*MAIN_WIDTH) + k) ? COL_BITMFG : COL_BITMBG;
+            }
+            out += MAIN_WIDTH+RULER_WIDTH;
+        }
+    }
+    
+    //coverage OR map
+    //skip first one, since it's done from single byte XOR over whole range
+    for (int i=1; i < ck->usedHistory; i++) {
+        for (int j=0; j < (LEN_CRYPT>>3); j++) {
+            orMap[j] |= ck->history[i][j];
+        }
+    }
+
+    for (int i=0; i < MAIN_HEIGHT; i++) {
+        for (int j=0; j < MAIN_WIDTH; j++) {
+            out[j] = GETBIT(orMap, (i*MAIN_WIDTH) + j) ? COL_BITMFG : COL_BITMBG;
+        }
+        out += MAIN_WIDTH+RULER_WIDTH;
+    }
+    
+    closeFileThing(&ftOut);
+    return true;
+}
+
 //t1 firmwares have one pair of keys, t2 another
 static FileThing t1Firmwares[] = {
     FT_DEFINE("./../t1/myV-55_KB3,MC  010604 1043(22)_251538352_M2004_F153_04_N2_Vodafone_FID12.fls"),
@@ -411,6 +527,7 @@ int main(int argc, char* argv[]) {
     CHK(getKeyFromFilePlaintext(&t1Keys[1], &t1Firmwares[0], 0xE5109A-LEN_HEADER, &plaintexts[0])); //myv55: barthezz
     CHK(getKeyFromFilePlaintext(&t1Keys[1], &t1Firmwares[0], 0xF0D38A-LEN_HEADER, &plaintexts[1])); //myv55: mrvain
     
+    CHK(writeCryptkeyAndHistoryPixelmap(&t1Keys[1], "./t1user.bmp"));
     CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[0], "./dec_myV-55.bin"));
     
     return 0;
