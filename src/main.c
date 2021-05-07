@@ -362,15 +362,15 @@ bool writeXoredFirmwareWithCryptkeyPair(CryptKey* ckOs, CryptKey* ckUser, FileTh
 }
 
 
-
+#define RGB8(_B,_G,_R) ((_B)/64 + ((_G)/32)*4 + ((_R)/32)*32)
 #define MAIN_WIDTH      256
 #define MAIN_HEIGHT     LEN_CRYPT/MAIN_WIDTH
-#define RULER_WIDTH     4*2
-#define COL_RULKEYBG    0x40
-#define COL_RULHISTBG   0x00
-#define COL_RULORHISTBG 0x63
-#define COL_RULFG       0xFF
-#define COL_BITMFG      0xFF
+#define RULER_WIDTH     4*1
+#define COL_RULKEYBG    RGB8(0,0,100)
+#define COL_RULHISTBG   RGB8(100,0,0)
+#define COL_RULORHISTBG RGB8(0,100,0)
+#define COL_RULFG       RGB8(255,255,255)
+#define COL_BITMFG      RGB8(255,255,255)
 #define COL_BITMBG      0x00
 #pragma pack(push,1)
 typedef struct {
@@ -381,8 +381,8 @@ typedef struct {
     uint32_t  bfOffBits;
     
     uint32_t  biSize;
-    uint32_t  biWidth;
-    uint32_t  biHeight;
+    int32_t   biWidth;
+    int32_t   biHeight;
     uint16_t  biPlanes;
     uint16_t  biBitCount;
     uint32_t  biCompression;
@@ -398,32 +398,34 @@ bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
     FileThing ftOut = FT_DEFINE(outPath);
     ftOut.size = sizeof(BmpHeader) + (pixelCount);
     if (!openFileThing(&ftOut, O_WRONLY|O_CREAT)) return false;
-    BmpHeader* bmpHeader = ftOut.rawData;
+    BmpHeader* bmpHead = ftOut.rawData;
+    printf("bmphead %d\n", sizeof(BmpHeader));
     
-    memset(bmpHeader, 0x00, sizeof(BmpHeader));
-    bmpHeader->bfType        = 0x4D42; //BM
-    bmpHeader->bfOffBits     = sizeof(bmpHeader);
-    bmpHeader->bfSize        = sizeof(bmpHeader) + pixelCount;
-    bmpHeader->biSize        = 40; //offsetof(BmpFile,Pal)-offsetof(BmpFile,biSize)
-    bmpHeader->biWidth       = MAIN_WIDTH+RULER_WIDTH;
-    bmpHeader->biHeight      = MAIN_HEIGHT * imageCount;
-    bmpHeader->biPlanes      = 1;
-    bmpHeader->biBitCount    = 8;
-    bmpHeader->biCompression = 0; //BI_RGB
+    memset(bmpHead, 0x00, sizeof(BmpHeader));
+    bmpHead->bfType        = 0x4D42; //BM
+    bmpHead->bfSize        = sizeof(BmpHeader) + pixelCount;
+    bmpHead->bfOffBits     = sizeof(BmpHeader);
+    
+    bmpHead->biSize        = 40; //offsetof(BmpFile,Pal)-offsetof(BmpFile,biSize)
+    bmpHead->biWidth       = MAIN_WIDTH+RULER_WIDTH;
+    bmpHead->biHeight      = -(MAIN_HEIGHT * imageCount);
+    bmpHead->biPlanes      = 1;
+    bmpHead->biBitCount    = 8;
+    bmpHead->biCompression = 0; //BI_RGB
     
     //rgb(3:3:2) palette
     uint32_t i = 0;
     for (uint32_t red=0; red < 8; red++) {
         for (uint32_t green=0; green < 8; green++) {
-            for (uint32_t blue=0; blue < 8; blue++) {
-                bmpHeader->palette[i++] = ((blue*255)/3) | (((green*255)/7) << 8) | (((red*255)/7) << 16);
+            for (uint32_t blue=0; blue < 4; blue++) {
+                bmpHead->palette[i++] = ((blue*255)/3) | (((green*255)/7) << 8) | (((red*255)/7) << 16);
             }
         }
     }
     
     void drawRuler(uint8_t** ppOut, uint8_t colBg) {
         for (int i=0; i < MAIN_HEIGHT; i++) {
-            #define NUM_DIVISIONS 1
+            #define NUM_DIVISIONS 4
             uint32_t wMask = 0xFF>>(NUM_DIVISIONS-1);
             uint8_t  rulerLineWidth;
             *ppOut += MAIN_WIDTH;
@@ -442,11 +444,11 @@ bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
     }
     
     //ruler
+    
     out = ftOut.rawData + sizeof(BmpHeader);
     drawRuler(&out, COL_RULKEYBG);
     for (int i=0; i<ck->usedHistory; i++) drawRuler(&out, COL_RULHISTBG);
     drawRuler(&out, COL_RULORHISTBG);
-    
     out = ftOut.rawData + sizeof(BmpHeader);
     //key
     for (int i=0; i < MAIN_HEIGHT; i++) {
@@ -458,7 +460,7 @@ bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
     for (int i=0; i < ck->usedHistory; i++) {
         for (int j=0; j < MAIN_HEIGHT; j++) {
             for (int k=0; k < MAIN_WIDTH; k++) {
-                out[k] = GETBIT(ck->history[i], (j*MAIN_WIDTH) + k) ? COL_BITMFG : COL_BITMBG;
+                out[k] = GETBIT(ck->history[i], j*MAIN_WIDTH + k) ? COL_BITMFG : COL_BITMBG;
             }
             out += MAIN_WIDTH+RULER_WIDTH;
         }
