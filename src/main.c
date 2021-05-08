@@ -533,7 +533,19 @@ int main(int argc, char* argv[]) {
     CHK(getKeyFromFilePlaintext(&t1Keys[1], &t1Firmwares[0], 0xF0D38A-LEN_HEADER, &plaintexts[1])); //myv55: mrvain
     
     CHK(writeCryptkeyAndHistoryPixelmap(&t1Keys[1], "./t1user.bmp"));
-    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[0], "./dec_myV-55.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[0],  "./dec_myV55.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[1],  "./dec_myC52_001.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[2],  "./dec_myC52_002.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[3],  "./dec_myC52_003.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[4],  "./dec_myC52_004.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[5],  "./dec_myC52_005.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[6],  "./dec_myC52_006.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[7],  "./dec_myX4_001.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[8],  "./dec_myX4_002.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[9],  "./dec_myX4_003.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[10], "./dec_myX4_004.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[11], "./dec_myX4_005.bin"));
+    CHK(writeXoredFirmwareWithCryptkeyPair(NULL, &t1Keys[1], &t1Firmwares[12], "./dec_myX4_006.bin"));
     
     return 0;
 }
