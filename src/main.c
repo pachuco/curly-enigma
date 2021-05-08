@@ -362,16 +362,17 @@ bool writeXoredFirmwareWithCryptkeyPair(CryptKey* ckOs, CryptKey* ckUser, FileTh
 }
 
 
-#define RGB8(_B,_G,_R) ((_B)/64 + ((_G)/32)*4 + ((_R)/32)*32)
+#define RGB8(R, G, B)      ((B)/64 + ((G)/32)*4 + ((R)/32)*32)
+#define DARKEN(COL, RATIO) (COL*RATIO/255)
 #define MAIN_WIDTH      256
 #define MAIN_HEIGHT     LEN_CRYPT/MAIN_WIDTH
-#define RULER_WIDTH     4*1
-#define COL_RULKEYBG    RGB8(0,0,100)
-#define COL_RULHISTBG   RGB8(100,0,0)
-#define COL_RULORHISTBG RGB8(0,100,0)
+#define RULER_WIDTH     4*2
+#define COL_RULKEYBG    RGB8(100,0  ,0  )
+#define COL_RULHISTBG   RGB8(0  ,0  ,200)
+#define COL_RULORHISTBG RGB8(0  ,100,0  )
 #define COL_RULFG       RGB8(255,255,255)
 #define COL_BITMFG      RGB8(255,255,255)
-#define COL_BITMBG      0x00
+#define COL_BITMBG      RGB8(0  ,0  ,0  )
 #pragma pack(push,1)
 typedef struct {
     uint16_t  bfType;
@@ -442,12 +443,15 @@ bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
         }
     }
     
-    //ruler
-    
     out = ftOut.rawData + sizeof(BmpHeader);
+    //ruler
     drawRuler(&out, COL_RULKEYBG);
-    for (int i=0; i<ck->usedHistory; i++) drawRuler(&out, COL_RULHISTBG);
+    for (int i=0; i<ck->usedHistory; i++) {
+        uint8_t col = i&1 ? DARKEN(COL_RULHISTBG, 200) : COL_RULHISTBG;
+        drawRuler(&out, col);
+    }
     drawRuler(&out, COL_RULORHISTBG);
+    
     out = ftOut.rawData + sizeof(BmpHeader);
     //key
     for (int i=0; i < MAIN_HEIGHT; i++) {
