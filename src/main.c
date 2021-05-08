@@ -307,8 +307,8 @@ bool getKeyFromBytePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, 
         for (uint32_t i=0; i < LEN_CRYPT; i++) {
             SETBIT(ck->history[ck->usedHistory], (offset+i)&(LEN_CRYPT-1));
         }
+        ck->usedHistory++;
     }
-    ck->usedHistory++;
     
     return true;
 }
@@ -327,7 +327,7 @@ bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, 
             SETBIT(ck->history[ck->usedHistory], (offset+i)&(LEN_CRYPT-1));
         }
     }
-    ck->usedHistory++;
+    if (ck->usedHistory < MAX_HISTORY) ck->usedHistory++;
     
     return true;
 }
@@ -399,7 +399,6 @@ bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
     ftOut.size = sizeof(BmpHeader) + (pixelCount);
     if (!openFileThing(&ftOut, O_WRONLY|O_CREAT)) return false;
     BmpHeader* bmpHead = ftOut.rawData;
-    printf("bmphead %d\n", sizeof(BmpHeader));
     
     memset(bmpHead, 0x00, sizeof(BmpHeader));
     bmpHead->bfType        = 0x4D42; //BM
@@ -424,20 +423,20 @@ bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
     }
     
     void drawRuler(uint8_t** ppOut, uint8_t colBg) {
+        #define NUM_DIVISIONS 3
         for (int i=0; i < MAIN_HEIGHT; i++) {
-            #define NUM_DIVISIONS 4
-            uint32_t wMask = 0xFF>>(NUM_DIVISIONS-1);
-            uint8_t  rulerLineWidth;
             *ppOut += MAIN_WIDTH;
             
             //background
             memset(*ppOut, colBg, RULER_WIDTH);
             
             //foreground
-            for (rulerLineWidth=(NUM_DIVISIONS-1); rulerLineWidth>0; rulerLineWidth--) {
-                if (!(wMask<<rulerLineWidth)) break;
+            for (int j=0; j < NUM_DIVISIONS; j++) {
+                if (i % (MAIN_HEIGHT>>j)) continue;
+                
+                memset(*ppOut, COL_RULFG, RULER_WIDTH/(j+1));
+                break;
             }
-            memset(*ppOut, COL_RULFG, rulerLineWidth);
             
             *ppOut += RULER_WIDTH;
         }
