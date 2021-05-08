@@ -10,54 +10,6 @@
 #include "util.h"
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //find what is possibly 64kb of encrypted blank space
 /*int doBlankFind(uint32_t* outOff, uint32_t startOffset) {
     int nrSegments = (g_fileMemLen - startOffset - LEN_HEADER) / LEN_CRYPT;
@@ -104,8 +56,9 @@ bool getKeyFromBytePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, 
     
     if (ck->usedHistory < MAX_HISTORY) {
         for (uint32_t i=0; i < LEN_CRYPT; i++) {
-            SETBIT(ck->history[ck->usedHistory], (offset+i) & MASK_CRYPT);
+            SETBIT(ck->history[ck->usedHistory].data, (offset+i) & MASK_CRYPT);
         }
+        ck->history[ck->usedHistory].operation = HISTOP_BYTEXOR;
         ck->usedHistory++;
     }
     
@@ -123,10 +76,14 @@ bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, 
         
         ck->data[(offset+i) & MASK_CRYPT] = key;
         if (ck->usedHistory < MAX_HISTORY && key != oldKey) {
-            SETBIT(ck->history[ck->usedHistory], (offset+i) & MASK_CRYPT);
+            SETBIT(ck->history[ck->usedHistory].data, (offset+i) & MASK_CRYPT);
         }
     }
-    if (ck->usedHistory < MAX_HISTORY) ck->usedHistory++;
+    
+    if (ck->usedHistory < MAX_HISTORY) {
+        ck->history[ck->usedHistory].operation = HISTOP_FILEXOR;
+        ck->usedHistory++;
+    }
     
     return true;
 }

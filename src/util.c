@@ -212,17 +212,17 @@ bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
     for (int i=0; i < ck->usedHistory; i++) {
         for (int j=0; j < MAIN_HEIGHT; j++) {
             for (int k=0; k < MAIN_WIDTH; k++) {
-                out[k] = GETBIT(ck->history[i], j*MAIN_WIDTH + k) ? COL_BITMFG : COL_BITMBG;
+                out[k] = GETBIT(ck->history[i].data, j*MAIN_WIDTH + k) ? COL_BITMFG : COL_BITMBG;
             }
             out += MAIN_WIDTH+RULER_WIDTH;
         }
     }
     
-    //coverage OR map
-    //skip first one, since it's done from single byte XOR over whole range
-    for (int i=1; i < ck->usedHistory; i++) {
-        for (int j=0; j < (LEN_HISTORY); j++) {
-            orMap[j] |= ck->history[i][j];
+    //coverage OR map of file plaintexts
+    for (int i=0; i < ck->usedHistory; i++) {
+        if (ck->history[i].operation != HISTOP_FILEXOR) continue;
+        for (int j=0; j < LEN_HISTORY; j++) {
+            orMap[j] |= ck->history[i].data[j];
         }
     }
 

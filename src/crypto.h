@@ -45,11 +45,19 @@ typedef struct { //len 48??
 } FirmwareHeader;
 #pragma pack(pop)
 
+enum {
+    HISTOP_BYTEXOR,
+    HISTOP_FILEXOR,
+};
+
 typedef struct {
     uint8_t  data[LEN_CRYPT];
     //shows which bytes were changed each round
     uint32_t usedHistory;
-    uint8_t  history[MAX_HISTORY][LEN_HISTORY];
+    struct {
+        uint8_t operation;
+        uint8_t data[LEN_HISTORY];
+    } history[MAX_HISTORY];
 } CryptKey;
 
 //some things we know:
