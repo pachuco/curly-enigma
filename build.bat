@@ -4,7 +4,7 @@ call getcomp.bat rosbe
 
 set opts=-std=c99 -mconsole -Os -s -Wall -Wextra -DNONMMAP_FALLBACK
 set link=
-set compiles=src\main.c src\mman.c
+set compiles=src\main.c src\util.c src\mman.c
 set outname=.\bin\decryptry
 
 del %outname%.exe
