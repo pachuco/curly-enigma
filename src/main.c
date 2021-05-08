@@ -21,16 +21,13 @@
     #define O_RDWR    _O_RDWR
     #define O_WRONLY  _O_WRONLY
     #define O_CREAT   _O_CREAT
+    #include "debug.c"
     #define ftruncate _chsize
 #else
     #include <sys/mman.h>
 #endif
 
 #define COUNTOF(X) (sizeof(X) / sizeof(X[0]))
-
-#define GETBIT(BMAP, IND)   !!((BMAP)[(IND)>>3] &   (0x80>>((IND)&0x7)))
-#define SETBIT(BMAP, IND)     ((BMAP)[(IND)>>3] |=  (0x80>>((IND)&0x7)))
-#define UNSETBIT(BMAP, IND)   ((BMAP)[(IND)>>3] &= ~(0x80>>((IND)&0x7)))
 
 #define SWP16(X) (((X)>>8)&0x00FF) | (((X)<<8)&0xFF00)
 #define SWP24(X) (((X)>>16)&0x0000FF) | ((X)&0x00FF00) | (((X)<<16)&0xFF0000) 
@@ -88,9 +85,6 @@
 
 
 #define LEN_HEADER 0x30
-#define LEN_CRYPT 0x10000
-#define MAX_HISTORY 8
-
 #pragma pack(push,1)
 typedef struct { //len 48??
     char idString[19];      //not a 0t string
@@ -122,11 +116,18 @@ typedef struct { //len 48??
 } FirmwareHeader;
 #pragma pack(pop)
 
+#define MAX_HISTORY     8
+#define LEN_CRYPT       0x10000
+#define MASK_CRYPT      (LEN_CRYPT-1)
+#define LEN_HISTORY     (LEN_CRYPT>>3)
+#define GETBIT(BMAP, IND)   !!((BMAP)[(IND)>>3] &   (0x80>>((IND)&0x7)))
+#define SETBIT(BMAP, IND)     ((BMAP)[(IND)>>3] |=  (0x80>>((IND)&0x7)))
+#define UNSETBIT(BMAP, IND)   ((BMAP)[(IND)>>3] &= ~(0x80>>((IND)&0x7)))
 typedef struct {
     uint8_t  data[LEN_CRYPT];
     //shows which bytes were changed each round
     uint32_t usedHistory;
-    uint8_t  history[MAX_HISTORY][LEN_CRYPT>>3];
+    uint8_t  history[MAX_HISTORY][LEN_HISTORY];
 } CryptKey;
 
 typedef struct {
@@ -300,12 +301,12 @@ bool getKeyFromBytePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, 
         uint8_t cipher = pFtFirm->firm.data[offset+i];
         uint8_t key    = cipher ^ plainTextByte;
         
-        ck->data[(offset+i)&(LEN_CRYPT-1)] = key;
+        ck->data[(offset+i) & MASK_CRYPT] = key;
     }
     
     if (ck->usedHistory < MAX_HISTORY) {
         for (uint32_t i=0; i < LEN_CRYPT; i++) {
-            SETBIT(ck->history[ck->usedHistory], (offset+i)&(LEN_CRYPT-1));
+            SETBIT(ck->history[ck->usedHistory], (offset+i) & MASK_CRYPT);
         }
         ck->usedHistory++;
     }
@@ -320,11 +321,11 @@ bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, 
     for (uint32_t i=0; i < pFtPlain->size; i++) {
         uint8_t cipher = pFtFirm->firm.data[offset+i];
         uint8_t key    = cipher ^ pFtPlain->rawData[i];
-        uint8_t oldKey = ck->data[(offset+i)&(LEN_CRYPT-1)];
+        uint8_t oldKey = ck->data[(offset+i) & MASK_CRYPT];
         
-        ck->data[(offset+i)&(LEN_CRYPT-1)] = key;
+        ck->data[(offset+i) & MASK_CRYPT] = key;
         if (ck->usedHistory < MAX_HISTORY && key != oldKey) {
-            SETBIT(ck->history[ck->usedHistory], (offset+i)&(LEN_CRYPT-1));
+            SETBIT(ck->history[ck->usedHistory], (offset+i) & MASK_CRYPT);
         }
     }
     if (ck->usedHistory < MAX_HISTORY) ck->usedHistory++;
@@ -353,7 +354,7 @@ bool writeXoredFirmwareWithCryptkeyPair(CryptKey* ckOs, CryptKey* ckUser, FileTh
         }
         
         for (uint32_t j=startOff; j < endOff; j++) {
-           ftOut.firm.data[j] = pFtFirm->firm.data[j] ^ ck->data[j&(LEN_CRYPT-1)];
+           ftOut.firm.data[j] = pFtFirm->firm.data[j] ^ ck->data[j & MASK_CRYPT];
         }
     }
     
@@ -392,7 +393,7 @@ typedef struct {
 } BmpHeader;
 #pragma pack(pop)
 bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
-    uint8_t orMap[LEN_CRYPT>>3] = {0};
+    uint8_t orMap[LEN_HISTORY] = {0};
     uint8_t* out;
     uint32_t imageCount = (1 + ck->usedHistory + 1);
     uint32_t pixelCount = ((MAIN_WIDTH+RULER_WIDTH)*MAIN_HEIGHT) * imageCount;
@@ -472,7 +473,7 @@ bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
     //coverage OR map
     //skip first one, since it's done from single byte XOR over whole range
     for (int i=1; i < ck->usedHistory; i++) {
-        for (int j=0; j < (LEN_CRYPT>>3); j++) {
+        for (int j=0; j < (LEN_HISTORY); j++) {
             orMap[j] |= ck->history[i][j];
         }
     }
@@ -528,7 +529,9 @@ static CryptKey t2Keys[2] = {0};
 int main(int argc, char* argv[]) {
     assert(LEN_HEADER == sizeof(FirmwareHeader));
     
-    CHK(getKeyFromBytePlaintext(&t1Keys[1], &t1Firmwares[0], 0xDE0030,            0xFF));
+    CHK(getKeyFromBytePlaintext(&t1Keys[1], &t1Firmwares[0], 0xDE0030, 0xFF));
+    //CHK(getKeyFromBytePlaintext(&t1Keys[1], &t1Firmwares[1], 0xBA189A, 0xFF));
+    
     CHK(getKeyFromFilePlaintext(&t1Keys[1], &t1Firmwares[0], 0xE5109A-LEN_HEADER, &plaintexts[0])); //myv55: barthezz
     CHK(getKeyFromFilePlaintext(&t1Keys[1], &t1Firmwares[0], 0xF0D38A-LEN_HEADER, &plaintexts[1])); //myv55: mrvain
     
