@@ -8,11 +8,12 @@
 #define MAX_HISTORY     8
 #define LEN_CRYPT       0x10000
 #define MASK_CRYPT      (LEN_CRYPT-1)
-#define LEN_HISTORY     (LEN_CRYPT>>3)
+#define LEN_HISTORY     (LEN_CRYPT>>2)
 
-#define GETBIT(BMAP, IND)   !!((BMAP)[(IND)>>3] &   (0x80>>((IND)&0x7)))
-#define SETBIT(BMAP, IND)     ((BMAP)[(IND)>>3] |=  (0x80>>((IND)&0x7)))
-#define UNSETBIT(BMAP, IND)   ((BMAP)[(IND)>>3] &= ~(0x80>>((IND)&0x7)))
+
+#define GETBITS(BMAP, IND, MASK)    ((((uint8_t*)(BMAP))[(IND)>>2]>>(((IND)&3)<<1)) & ((MASK)&3))
+#define SETBITS(BMAP, IND, MASK)     (((uint8_t*)(BMAP))[(IND)>>2] |=  (((MASK)&3)<<(((IND)&3)<<1)))
+#define UNSETBITS(BMAP, IND, MASK)   (((uint8_t*)(BMAP))[(IND)>>2] &= ~(((MASK)&3)<<(((IND)&3)<<1)))
 
 #pragma pack(push,1)
 typedef struct { //len 48??
@@ -46,9 +47,14 @@ typedef struct { //len 48??
 #pragma pack(pop)
 
 enum {
+    HIST_TRIED  = 1<<0,
+    HIST_DID    = 1<<1,
+    HIST_MASK   = 3,
+    
     HISTOP_BYTEXOR,
     HISTOP_FILEXOR,
 };
+
 
 typedef struct {
     uint8_t  data[LEN_CRYPT];

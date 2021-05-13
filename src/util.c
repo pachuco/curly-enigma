@@ -12,8 +12,9 @@
 #define COL_RULHISTBG   RGB8(0  ,0  ,200)
 #define COL_RULORHISTBG RGB8(0  ,100,0  )
 #define COL_RULFG       RGB8(255,255,255)
-#define COL_BITMFG      RGB8(255,255,255)
 #define COL_BITMBG      RGB8(0  ,0  ,0  )
+#define COL_BITMFGTRY   RGB8(128,128,128)
+#define COL_BITMFGDID   RGB8(255,255,255)
 
 #pragma pack(push,1)
 typedef struct {
@@ -191,6 +192,18 @@ bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
             *ppOut += RULER_WIDTH;
         }
     }
+    void drawHistory(uint8_t** ppOut, uint8_t* pHist) {
+        for (int i=0; i < MAIN_HEIGHT; i++) {
+            for (int j=0; j < MAIN_WIDTH; j++) {
+                uint8_t hist = GETBITS(pHist, (i*MAIN_WIDTH) + j, HIST_MASK);
+                
+                if      (hist & HIST_DID)   (*ppOut)[j] = COL_BITMFGDID;
+                else if (hist & HIST_TRIED) (*ppOut)[j] = COL_BITMFGTRY;
+                else                        (*ppOut)[j] = COL_BITMBG;
+            }
+            *ppOut += MAIN_WIDTH+RULER_WIDTH;
+        }
+    }
     
     out = ftOut.rawData + sizeof(BmpHeader);
     //ruler
@@ -210,12 +223,7 @@ bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
     
     //history
     for (int i=0; i < ck->usedHistory; i++) {
-        for (int j=0; j < MAIN_HEIGHT; j++) {
-            for (int k=0; k < MAIN_WIDTH; k++) {
-                out[k] = GETBIT(ck->history[i].data, j*MAIN_WIDTH + k) ? COL_BITMFG : COL_BITMBG;
-            }
-            out += MAIN_WIDTH+RULER_WIDTH;
-        }
+        drawHistory(&out, &ck->history[i].data);
     }
     
     //coverage OR map of file plaintexts
@@ -225,13 +233,8 @@ bool writeCryptkeyAndHistoryPixelmap(CryptKey* ck, char* outPath) {
             orMap[j] |= ck->history[i].data[j];
         }
     }
-
-    for (int i=0; i < MAIN_HEIGHT; i++) {
-        for (int j=0; j < MAIN_WIDTH; j++) {
-            out[j] = GETBIT(orMap, (i*MAIN_WIDTH) + j) ? COL_BITMFG : COL_BITMBG;
-        }
-        out += MAIN_WIDTH+RULER_WIDTH;
-    }
+    
+    drawHistory(&out, &orMap);
     
     closeFileThing(&ftOut);
     return true;

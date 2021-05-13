@@ -56,7 +56,9 @@ bool getKeyFromBytePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, 
     
     if (ck->usedHistory < MAX_HISTORY) {
         for (uint32_t i=0; i < LEN_CRYPT; i++) {
-            SETBIT(ck->history[ck->usedHistory].data, (offset+i) & MASK_CRYPT);
+            uint8_t mask = HIST_TRIED | HIST_DID;
+            
+            SETBITS(ck->history[ck->usedHistory].data, (offset+i) & MASK_CRYPT, mask);
         }
         ck->history[ck->usedHistory].operation = HISTOP_BYTEXOR;
         ck->usedHistory++;
@@ -75,8 +77,10 @@ bool getKeyFromFilePlaintext(CryptKey* ck, FileThing* pFtFirm, uint32_t offset, 
         uint8_t oldKey = ck->data[(offset+i) & MASK_CRYPT];
         
         ck->data[(offset+i) & MASK_CRYPT] = key;
-        if (ck->usedHistory < MAX_HISTORY && key != oldKey) {
-            SETBIT(ck->history[ck->usedHistory].data, (offset+i) & MASK_CRYPT);
+        if (ck->usedHistory < MAX_HISTORY) {
+            uint8_t mask = HIST_TRIED | ((key != oldKey) ? HIST_DID : 0);
+            
+            SETBITS(ck->history[ck->usedHistory].data, (offset+i) & MASK_CRYPT, mask);
         }
     }
     
